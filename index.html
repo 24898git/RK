@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laptech Shopping Platform</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; color: blue; display: flex; flex-direction: column; min-height: 100vh; }
+        .content { flex: 1 0 auto; }
+        .product { border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; display: inline-block; width: 250px; vertical-align: top; }
+        .product img { width: 100%; height: 180px; object-fit: cover; }
+        #cart { border: 1px solid #ddd; padding: 10px; margin-top: 20px; }
+        .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); }
+        .modal-content { background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; }
+        .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+        input[type="email"], input[type="password"], input[type="tel"] { width: 100%; padding: 10px; margin: 10px 0; }
+        button { background-color: #b52f91; color: white; border: none; padding: 10px 20px; cursor: pointer; }
+        .error { color: red; }
+        #cart-items { margin-bottom: 10px; }
+        #cart-total { font-weight: bold; margin-top: 10px; }
+        #signin-status { margin-bottom: 10px; }
+        footer { background-color: #f8f9fa; padding: 20px 0; margin-top: 40px; text-align: center; flex-shrink: 0; }
+        .footer-content { display: flex; justify-content: space-around; flex-wrap: wrap; }
+        .footer-section { margin: 10px; }
+        .social-icons a { color: rgb(28, 159, 72); margin: 0 10px; font-size: 24px; }
+        .copyright { margin-top: 20px; font-size: 0.9em; color: #6c757d; }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <h1>Laptech Shopping Platform</h1>
+        
+        <div id="signin-status">. <button id="signin-button">Register</button></div>
+
+        <div id="products">
+            <!-- Products will be dynamically added here -->
+        </div>
+
+        <div id="cart">
+            <h2>Your Cart</h2>
+            <div id="cart-items"></div>
+            <div id="cart-total"></div>
+            <button id="checkout" disabled>Proceed to Checkout</button>
+        </div>
+
+        <div id="signin-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Sign In</h2>
+                <form id="signin-form">
+                    <input type="email" id="email" placeholder="Email" required>
+                    <input type="password" id="password" placeholder="Password" required>
+                    <div id="signin-error" class="error"></div>
+                    <button type="submit">Sign In</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="payment-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Checkout</h2>
+                <div id="checkout-items"></div>
+                <div id="checkout-total"></div>
+                <h3>Choose Payment Method</h3>
+                <button class="payment-method" data-method="mpesa">M-Pesa</button>
+                <button class="payment-method" data-method="card">Credit/Debit Card</button>
+                <button class="payment-method" data-method="paypal">PayPal</button>
+            </div>
+        </div>
+
+        <div id="mpesa-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>M-Pesa Payment</h2>
+                <form id="mpesa-form">
+                    <input type="tel" id="phone-number" placeholder="Enter M-Pesa number" required>
+                    <button type="submit">Pay</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="mpesa-pin-modal" class="modal">
+            <div class="modal-content">
+                <h2>M-Pesa PIN</h2>
+                <p>Please check your phone for the M-Pesa toolkit and enter your M-Pesa PIN to complete the payment.</p>
+                <button id="mpesa-ok">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Contact Us</h3>
+                <p>Email: 898@laptechshop.com</p>
+                <p>Phone: +254 700019520</p>
+                <p>Address: 898 Tech Street, Nairobi, Kenya</p>
+            </div>
+            <div class="footer-section">
+                <h3>Follow Us</h3>
+                <div class="social-icons">
+                    <a href="#" target="_blank"><i class="fab fa-facebook"></i></a>
+                    <a href="#" target="_blank"><i class="fab fa-twitter"></i></a>
+                    <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
+                    <a href="#" target="_blank"><i class="fab fa-tiktok"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="copyright">
+            &copy; 2024 Laptech Shopping Platform. All rights reserved.
+        </div>
+    </footer>
+
+    <script>
+        const laptops = [
+            { id: 1, name: "MacBook Air", price: 120000, image: "https://images.unsplash.com/photo-1611186871348-b1ce696e52c9" },
+            { id: 2, name: "Dell XPS 13", price: 150000, image: "https://images.unsplash.com/photo-1593642532744-d377ab507dc8" },
+            { id: 3, name: "Lenovo ThinkPad X1", price: 140000, image: "https://images.unsplash.com/photo-1541807084-5c52b6b3adef" },
+            { id: 4, name: "HP Spectre x360", price: 130000, image: "https://images.unsplash.com/photo-1544731612-de7f96afe55f" },
+            { id: 5, name: "ASUS ROG Zephyrus", price: 180000, image: "https://images.unsplash.com/photo-1603302576837-37561b2e2302" },
+            { id: 6, name: "Microsoft Surface Laptop", price: 135000, image: "https://images.unsplash.com/photo-1516387938699-a93567ec168e" },
+            { id: 7, name: "Acer Swift 5", price: 110000, image: "https://images.unsplash.com/photo-1580522154071-c6ca47a859ad" },
+            { id: 8, name: "Razer Blade 15", price: 200000, image: "https://images.unsplash.com/photo-1544731612-de7f96afe55f" },
+            { id: 9, name: "LG Gram 17", price: 145000, image: "https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2" },
+            { id: 10, name: "Chromebook Pixel", price: 90000, image: "https://images.unsplash.com/photo-1596937098209-6cd6e54be9c2" }
+        ];
+
+        const cart = [];
+        let isSignedIn = false;
+
+        function displayProducts() {
+            const productsDiv = document.getElementById('products');
+            laptops.forEach(laptop => {
+                const productDiv = document.createElement('div');
+                productDiv.className = 'product';
+                productDiv.innerHTML = `
+                    <img src="${laptop.image}" alt="${laptop.name}">
+                    <h3>${laptop.name}</h3>
+                    <p>KSh ${laptop.price}</p>
+                    <button class="add-to-cart" data-id="${laptop.id}">Add to Cart</button>
+                `;
+                productsDiv.appendChild(productDiv);
+            });
+        }
+
+        function updateCart() {
+            const cartItems = document.getElementById('cart-items');
+            const cartTotal = document.getElementById('cart-total');
+            cartItems.innerHTML = '';
+            let total = 0;
+            cart.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.innerHTML = `${item.name} - KSh ${item.price}`;
+                cartItems.appendChild(itemDiv);
+                total += item.price;
+            });
+            cartTotal.textContent = `Total: KSh ${total}`;
+            document.getElementById('checkout').disabled = cart.length === 0;
+        }
+
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('add-to-cart')) {
+                if (!isSignedIn) {
+                    alert('Please sign in to add items to your cart.');
+                    return;
+                }
+                const laptopId = parseInt(e.target.getAttribute('data-id'));
+                const laptop = laptops.find(l => l.id === laptopId);
+                if (laptop) {
+                    cart.push(laptop);
+                    updateCart();
+                    alert(`${laptop.name} added to cart!`);
+                }
+            }
+        });
+
+        document.getElementById('signin-button').addEventListener('click', function() {
+            document.getElementById('signin-modal').style.display = 'block';
+        });
+
+        document.getElementById('signin-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('signin-error');
+
+            if (!isValidEmail(email)) {
+                errorDiv.textContent = 'Please enter a valid email address.';
+                return;
+            }
+
+            if (password.length < 6) {
+                errorDiv.textContent = 'Password must be at least 6 characters long.';
+                return;
+            }
+
+            isSignedIn = true;
+            document.getElementById('signin-modal').style.display = 'none';
+            document.getElementById('signin-status').textContent = `Signed in as ${email}`;
+            alert('Signed in successfully! You can now add items to your cart.');
+        });
+
+        function isValidEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        document.getElementById('checkout').addEventListener('click', function() {
+            const checkoutItems = document.getElementById('checkout-items');
+            const checkoutTotal = document.getElementById('checkout-total');
+            checkoutItems.innerHTML = '';
+            let total = 0;
+            cart.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.innerHTML = `${item.name} - KSh ${item.price}`;
+                checkoutItems.appendChild(itemDiv);
+                total += item.price;
+            });
+            checkoutTotal.textContent = `Total: KSh ${total}`;
+            document.getElementById('payment-modal').style.display = 'block';
+        });
+
+        document.querySelectorAll('.payment-method').forEach(button => {
+            button.addEventListener('click', function() {
+                const method = this.getAttribute('data-method');
+                if (method === 'mpesa') {
+                    document.getElementById('payment-modal').style.display = 'none';
+                    document.getElementById('mpesa-modal').style.display = 'block';
+                } else {
+                    alert(`Processing payment with ${method}. Thank you for your purchase!`);
+                    document.getElementById('payment-modal').style.display = 'none';
+                    cart.length = 0; // Clear the cart
+                    updateCart();
+                }
+            });
+        });
+
+        document.getElementById('mpesa-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            document.getElementById('mpesa-modal').style.display = 'none';
+            document.getElementById('mpesa-pin-modal').style.display = 'block';
+        });
+
+        document.getElementById('mpesa-ok').addEventListener('click', function() {
+            document.getElementById('mpesa-pin-modal').style.display = 'none';
+            alert('Thank you for your purchase!');
+            cart.length = 0; // Clear the cart
+            updateCart();
+        });
+
+        document.querySelectorAll('.close').forEach(closeBtn => {
+            closeBtn.addEventListener('click', function() {
+                this.closest('.modal').style.display = 'none';
+            });
+        });
+
+        window.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                e.target.style.display = 'none';
+            }
+        });
+
+        displayProducts();
+        updateCart();
+    </script>
+</body>
+</html>
